@@ -11,7 +11,7 @@ module.exports = {
             },
         ],
     },
-    target: ['node', 'es6'],
+    target: "node",
     mode: "production",
     entry: {
         index: './src/index.ts',

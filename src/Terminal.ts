@@ -1,13 +1,14 @@
 import ansi from 'sisteransi';
 import readline from 'readline/promises';
 import pc from 'picocolors'
-import { Task } from './Task'
-import { LocalProvider, StorageProvider } from './Storage';
+import { LocalProvider, type StorageProvider } from './Storage';
+import type { cache } from './cache';
+import type { Task } from './Task';
 
 const p = (s: string) => process.stdout.write(s)
 
-// type commands = { priority: number, func: (inputs: string, m: Message) => any | Promise<any>, keyword: string[] }
-// type loglevel = "DEBUG" | "INFO" | "WARNING" | "ERROR"
+export type commands = { priority: number, func: (inputs: string, m: Message) => any | Promise<any>, keyword: string[] }
+type loglevel = "DEBUG" | "INFO" | "WARNING" | "ERROR"
 const logTr = {
     DEBUG: 0,
     INFO: 10,
@@ -274,4 +275,4 @@ class Message {
 }
 
 
-export { Message }
+export { Message, Task }

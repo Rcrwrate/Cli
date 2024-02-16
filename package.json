@@ -1,12 +1,13 @@
 {
   "name": "@rcrwrate/cli",
-  "version": "0.0.2",
+  "version": "0.0.5",
   "description": "Cli",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "webpack --config webpack.config.js",
+    "build": "rm -rf ./dist/ && webpack --config webpack.config.js",
     "start": "node ./dist/index.js",
+    "tsc": "rm -rf ./dist/ && tsc",
     "publish": "npm publish --access public"
   },
   "author": "Rcrwrate",
@@ -19,7 +20,7 @@
     "node": ">=18.17.0"
   },
   "repository": {
-    "url": "Rcrwrate/Cli"
+    "url": "git+https://github.com/Rcrwrate/Cli.git"
   },
   "devDependencies": {
     "ts-loader": "^9.5.1",

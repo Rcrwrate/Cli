@@ -11,7 +11,7 @@
 引入就能运行
 
 ```ts
-import cli from "./dist";
+import cli from "@rcrwrate/cli";
 
 //注册控制台命令
 cli.m.registerCommand([
