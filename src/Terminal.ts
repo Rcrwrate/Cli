@@ -36,6 +36,7 @@ class Message {
     private startTime = new Date().getTime()
     private lastScreen = "\n".repeat(7)
     private tip = ""
+    private Tid?: NodeJS.Timeout
     private TaskStatus = {
         all: 0,
         success: 0,
@@ -68,7 +69,7 @@ class Message {
         setInterval(async () => this.runTasks(), 500)
         this.start()
         this.registerCommand({
-            keyword: ["s"], priority: 10, func: (input, m) => {
+            keyword: ["s"], priority: 10, help: "控制最大线程数量", func: (input, m) => {
                 const c = parseInt(input)
                 if (isNaN(c)) {
                     this.Tip("\n使用>s +1/-1控制最大线程数量\n", 1000)
@@ -121,9 +122,6 @@ class Message {
             case "debug":
                 this.changeLogLevel("DEBUG")
                 break
-            case "t":
-                this.pushLog(JSON.stringify(this.commands), "DEBUG")
-                break
             default:
                 for (const i of this.commands) {
                     for (const j of i.keyword) {
@@ -138,9 +136,10 @@ class Message {
     }
 
     private async Close() {
+        this.rl?.close()
+        this.Tip("正在等待任务队列终止", 100000)
         const all = this.TasksInRun.concat(this.Tasks)
         await Promise.all(all.map(i => i.onClose(this)))
-        this.rl?.close()
         this.cache.save()
         process.exit(0)
     }
@@ -179,7 +178,8 @@ class Message {
      */
     Tip(msg: string, timeout: number = 5000) {
         this.tip = msg
-        return setTimeout(() => this.tip = "", timeout);
+        if (this.Tid) clearTimeout(this.Tid)
+        return this.Tid = setTimeout(() => this.tip = "", timeout);
     }
 
     /**
@@ -245,6 +245,21 @@ class Message {
         }
     }
 
+
+    /**
+     * 即刻执行, 可以用于初始化某些东西
+     * @example 在cli就绪的时候试图恢复上次未完成的任务
+     */
+    run(funcs: (m: Message) => void | Promise<void>): Promise<void>
+    run(funcs: Array<(m: Message) => void | Promise<void>>): Promise<void[]>
+    async run(funcs: ((m: Message) => void | Promise<void>) | Array<(m: Message) => void | Promise<void>>) {
+        if (funcs instanceof Array) {
+            return Promise.all(funcs.map(i => i(this)))
+        } else {
+            return funcs(this)
+        }
+    }
+
     private toTerminal() {
         if (this.logs.length === 0) {
             const counts = this.lastScreen.split("\n").length
@@ -256,7 +271,7 @@ class Message {
                 + `${this.TaskStatus.error ? `\nErrors:\t\t\t${this.TaskStatus.error} (retrying may help)` : ""}`
                 + `\nElapsed time:\t\t${this.renderTime()}\t\n`
                 + (this.TasksInRun.length === 0 ? "" : "\n")
-                + this.TasksInRun.map(i => "\t*\t" + i.name ?? i.uuid + "\t" + i.status).join("\n")
+                + this.TasksInRun.map(i => "\t*\t" + (i.name ?? i.uuid) + "\t" + i.status).join("\n")
                 + (this.TasksInRun.length === 0 ? "" : "\n")
                 + this.tip
                 + `\ncommand >${this.rl?.line}\r`
@@ -276,7 +291,7 @@ class Message {
                 + `${this.TaskStatus.error ? `\nErrors:\t\t\t${this.TaskStatus.error} (retrying may help)` : ""}`
                 + `\nElapsed time:\t\t${this.renderTime()}\t\n`
                 + (this.TasksInRun.length === 0 ? "" : "\n")
-                + this.TasksInRun.map(i => "\t*\t" + i.name ?? i.uuid + "\t" + i.status).join("\n")
+                + this.TasksInRun.map(i => "\t*\t" + (i.name ?? i.uuid) + "\t" + i.status).join("\n")
                 + (this.TasksInRun.length === 0 ? "" : "\n")
                 + this.tip
                 + `\ncommand >${this.rl?.line}\r`

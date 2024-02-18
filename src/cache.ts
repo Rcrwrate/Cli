@@ -11,13 +11,30 @@ class cache {
         this.load()
     }
 
-    get(key: string) {
-        return this.data[key]
+    get<T>(key: string) {
+        return this.data[key] as T | undefined
     }
 
-    set(key: string, value: any) {
+    set<T>(key: string, value: T) {
         this.data[key] = value
         return value
+    }
+
+    delete(key: string) {
+        delete this.data[key]
+    }
+
+    /**
+     * 列表push
+     * @param key 
+     * @param value 
+     */
+    push<T>(key: string, value: T) {
+        if (this.data[key] instanceof Array) {
+            (this.data[key] as Array<T>).push(value)
+        } else {
+            this.data[key] = [value]
+        }
     }
 
     load() {
