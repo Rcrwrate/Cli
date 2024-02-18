@@ -7,7 +7,14 @@ import type { Task } from './Task';
 
 const p = (s: string) => process.stdout.write(s)
 
-export type commands = { priority: number, func: (inputs: string, m: Message) => any | Promise<any>, keyword: string[] }
+export type commands = {
+    /** 优先级 */
+    priority: number,
+    func: (inputs: string, m: Message) => any | Promise<any>,
+    keyword: string[]
+    /** 说明文字 */
+    help?: string
+}
 type loglevel = "DEBUG" | "INFO" | "WARNING" | "ERROR"
 const logTr = {
     DEBUG: 0,
@@ -18,7 +25,7 @@ const logTr = {
 
 const logTi = {
     DEBUG: pc.gray("DEBUG"),
-    INFO: "INGO",
+    INFO: "INFO",
     WARNING: pc.yellow("WARNING"),
     ERROR: pc.red("ERROR"),
 }
@@ -93,11 +100,16 @@ class Message {
     }
 
     private completer(line: string) {
-        const completions: string[] = ["q", "debug"]
-        this.commands.forEach(i => { i.keyword.forEach(j => completions.push(j)) })
-        const hits = completions.filter((c) => c.startsWith(line));
-        // Show all completions if none found
-        this.Tip(`\n${(hits.length ? hits : completions).join("\t")}`, 1500)
+        const completions: { key: string, help?: string }[] = [{ key: "q", help: "退出Cli" }, { key: "debug", help: "更改日志等级为DEBUG" }]
+        this.commands.forEach(i => { i.keyword.forEach(j => completions.push({ key: j, help: i.help })) })
+        const hits = completions.filter((c) => c.key.startsWith(line));
+        if (hits.length === 1) {
+            this.Tip(`\n${hits[0].key} : ${hits[0].help ?? "无说明"}`, 1500)
+        } else {
+            // Show all completions if none found
+            this.Tip(`\n${(hits.length ? hits.map(i => i.key) : completions.map(i => i.key)).join("\t")}`, 1500)
+        }
+
         return [[], line];
     }
 
@@ -105,7 +117,7 @@ class Message {
         this.pushLog(r, "DEBUG")
         switch (r) {
             case "q":
-                process.exit(0)
+                this.Close()
             case "debug":
                 this.changeLogLevel("DEBUG")
                 break
@@ -125,6 +137,14 @@ class Message {
         }
     }
 
+    private async Close() {
+        const all = this.TasksInRun.concat(this.Tasks)
+        await Promise.all(all.map(i => i.onClose(this)))
+        this.rl?.close()
+        this.cache.save()
+        process.exit(0)
+    }
+
     private async runTasks() {
         if (this.Tasks.length !== 0 && this.TasksInRun.length < this.MaxRun) {
             let t: Task | undefined
@@ -139,9 +159,11 @@ class Message {
         const id = setTimeout(async () => {
             try {
                 await task.Run(this)
-                task.onSuccess(this)
+                await task.onSuccess(this)
             }
-            catch (e) { task.onFailed(this, e as Error) }
+            catch (e) {
+                await task.onFailed(this, e as Error)
+            }
             this.TaskSession = this.TaskSession.filter(i => i !== id)
             this.TasksInRun = this.TasksInRun.filter(i => i.uuid !== task.uuid)
         })

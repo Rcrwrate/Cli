@@ -10,30 +10,33 @@
 
 引入就能运行
 
-```ts
-import cli from "@rcrwrate/cli";
+```ts name="test.ts"
+import { Task, m, type Message } from "@rcrwrate/cli";
 
-//注册控制台命令
-cli.m.registerCommand([
-  {
-    func(input, m) {
-      //推送任务日志
-      m.pushLog(input, "INFO");
-      //注册任务队列
-      m.registerTask(new exampleTask());
-    },
-    keyword: ["test"],
-    priority: 10,
-  },
-]);
-
-class exampleTask extends cli.Task {
+class exampleTask extends Task {
   async Run(m: Message): Promise<any> {
     //推送任务状态
     m.pushStatus({ all: 1, success: 1 });
     m.pushLog(this.uuid, "DEBUG");
   }
 }
+
+//注册控制台命令
+m.registerCommand([
+  {
+    func(input, m) {
+      //推送任务日志
+      m.pushLog(input, "INFO");
+      //注册任务队列
+      m.registerTask([new exampleTask()]);
+    },
+    keyword: ["test"],
+    priority: 10,
+    help: "TEST",
+  },
+]);
 ```
 
 更多请自行查看相关 Typescript 信息
+
+### 题外话
