@@ -8,7 +8,7 @@ import type { Task } from './Task';
 const p = (s: string) => process.stdout.write(s)
 
 export type commands = {
-    /** 优先级 */
+    /** 优先级，越小越优先 */
     priority: number,
     func: (inputs: string, m: Message) => any | Promise<any>,
     keyword: string[]
@@ -104,7 +104,10 @@ class Message {
         const completions: { key: string, help?: string }[] = [{ key: "q", help: "退出Cli" }, { key: "debug", help: "更改日志等级为DEBUG" }]
         this.commands.forEach(i => { i.keyword.forEach(j => completions.push({ key: j, help: i.help })) })
         const hits = completions.filter((c) => c.key.startsWith(line));
-        if (hits.length === 1) {
+        const hit = hits.find(i => i.key === line)
+        if (hit) {
+            this.Tip(`\n${hit.key} : ${hit.help ?? "无说明"}`, 1500)
+        } else if (hits.length === 1) {
             this.Tip(`\n${hits[0].key} : ${hits[0].help ?? "无说明"}`, 1500)
         } else {
             // Show all completions if none found
@@ -136,10 +139,11 @@ class Message {
     }
 
     private async Close() {
-        this.rl?.close()
+        this.rl?.pause()
         this.Tip("正在等待任务队列终止", 100000)
         const all = this.TasksInRun.concat(this.Tasks)
         await Promise.all(all.map(i => i.onClose(this)))
+        this.rl?.close()
         this.cache.save()
         process.exit(0)
     }
@@ -211,6 +215,10 @@ class Message {
 
     /**
      * 推送任务状态
+     * 
+     * all  任务总数+N
+     * success 成功总数+N
+     * error 失败总数+N
      */
     pushStatus({ all, success, error }: { all?: number, success?: number, error?: number }) {
         if (all) this.TaskStatus.all += all
@@ -231,6 +239,19 @@ class Message {
     }
 
     /**
+     * 移除指定控制台命令
+     * 
+     * 请注意，q和debug无法被移除
+     */
+    unregisterCommand(word: string | string[]) {
+        if (word instanceof Array) {
+            word.map(i => this.unregisterCommand(i))
+        } else {
+            this.commands = this.commands.filter(i => !i.keyword.includes(word))
+        }
+    }
+
+    /**
      * 注册任务队列
      * @param tasks 
      */
@@ -245,10 +266,9 @@ class Message {
         }
     }
 
-
     /**
      * 即刻执行, 可以用于初始化某些东西
-     * @example 在cli就绪的时候试图恢复上次未完成的任务
+     * @example 可以用于在cli就绪的时候试图恢复上次未完成的任务
      */
     run(funcs: (m: Message) => void | Promise<void>): Promise<void>
     run(funcs: Array<(m: Message) => void | Promise<void>>): Promise<void[]>

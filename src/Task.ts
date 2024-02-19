@@ -6,7 +6,7 @@ export class Task {
     status: string = "";
     /** 无视队列限制，强制执行，优先级仍有效 @default false*/
     noLimit = false;
-    /** 优先级 @default 10*/
+    /** 优先级，越小越优先 @default 10*/
     priority: number = 10;
     name?: string;
     uuid;

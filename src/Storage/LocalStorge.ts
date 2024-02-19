@@ -5,8 +5,8 @@ import { writeFile } from 'fs/promises'
 
 class LocalProvider extends StorageProvider {
     path: string
+
     /**
-     * 
      * @param path 根目录 例如 [".tmp","2024.1.1"] 
      */
     constructor(path: string[] = [".data"]) {
@@ -24,8 +24,12 @@ class LocalProvider extends StorageProvider {
         return existsSync(join(this.path, name))
     }
 
-    async write(r: Response, filename: string): Promise<any> {
+    protected async writeResponse(r: Response, filename: string): Promise<any> {
         return writeFile(join(this.path, filename), new DataView(await r.arrayBuffer()))
+    }
+
+    protected async writeString(r: string, filename: string): Promise<any> {
+        return writeFile(join(this.path, filename), r)
     }
 }
 
