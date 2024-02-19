@@ -1,4 +1,6 @@
 # 一个神秘的交互式 Cli 框架
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FRcrwrate%2FCli.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FRcrwrate%2FCli?ref=badge_shield)
+
 
 内含如下内容：
 
@@ -77,3 +79,7 @@ m.run((m) => {
 ```
 
 更多请自行查看相关 Typescript 信息
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FRcrwrate%2FCli.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FRcrwrate%2FCli?ref=badge_large)
