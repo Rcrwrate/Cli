@@ -1,0 +1,61 @@
+﻿name: Publish
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  publish-npm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ">=18.17.0"
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Build
+        run: npm install
+
+      - name: Build
+        run: npm run tsc
+
+      - name: Test
+        run: npm run ci
+
+      - name: Publish to NPM
+        continue-on-error: true
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm publish --access public
+
+  publish-github:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ">=18.17.0"
+          registry-url: https://npm.pkg.github.com/
+
+      - name: Build
+        run: npm install
+
+      - name: Build
+        run: npm run tsc
+
+      - name: Test
+        run: npm run ci
+
+      - name: Publish to Github
+        continue-on-error: true
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        run: |
+          npm publish --access public

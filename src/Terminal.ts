@@ -134,13 +134,18 @@ class Message {
                         }
                     }
                 }
-                this.Tip("\n未找到相应命令\n", 1000)
+                this.Tip("\n未找到相应命令", 1000)
         }
     }
 
-    private async Close() {
+    /**
+     * 关闭Cli
+     * 
+     * @example 也许可以用于在任务队列执行完之后自动关闭
+     */
+    async Close() {
         this.rl?.pause()
-        this.Tip("正在等待任务队列终止", 100000)
+        this.Tip("\n正在等待任务队列终止", 100000)
         const all = this.TasksInRun.concat(this.Tasks)
         await Promise.all(all.map(i => i.onClose(this)))
         this.rl?.close()

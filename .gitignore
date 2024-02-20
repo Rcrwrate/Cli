@@ -8,5 +8,6 @@ dist/
 
 *.zip
 
-test.*
-!test.ts
+test/*.js
+
+.npmrc
