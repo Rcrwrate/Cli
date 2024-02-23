@@ -5,7 +5,7 @@ const sleep = (t: number | undefined) => new Promise((r) => setTimeout(r, t))
 class EndTask extends Task {
     name?: string | undefined = "End"
     async Run(m: Message): Promise<any> {
-        await sleep(2000)
+        await sleep(5000)
         return m.Close()
     }
 
@@ -21,6 +21,11 @@ class TimeoutTest extends Task {
         await sleep(3000)
         signal?.throwIfAborted()
         return
+    }
+
+    async onTimeout(m: Message): Promise<void> {
+        await sleep(1000)
+        m.pushLog(`${this.name ?? this.uuid} 超时${this.timeout as number / 1000}s`, "ERROR")
     }
 }
 

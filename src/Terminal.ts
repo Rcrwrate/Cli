@@ -165,6 +165,10 @@ class Message {
 
     private runTask(task: Task) {
         const signal = task.timeout ? AbortSignal.timeout(task.timeout) : undefined
+        signal?.addEventListener("abort", () => {
+            this.TaskSession = this.TaskSession.filter(i => i !== id)
+            this.TasksInRun = this.TasksInRun.filter(i => i.uuid !== task.uuid)
+        }, { once: true })
         const id = setTimeout(async () => {
             try {
                 await task.Run(this, signal)
