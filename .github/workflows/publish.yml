@@ -15,7 +15,7 @@ jobs:
           node-version: ">=18.17.0"
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Build
+      - name: install
         run: npm install
 
       - name: Build
@@ -44,7 +44,7 @@ jobs:
           node-version: ">=18.17.0"
           registry-url: https://npm.pkg.github.com/
 
-      - name: Build
+      - name: install
         run: npm install
 
       - name: Build

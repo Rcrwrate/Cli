@@ -145,7 +145,7 @@ class Message {
      */
     async Close() {
         this.rl?.pause()
-        this.Tip("\n正在等待任务队列终止", 100000)
+        this.tip = "\n正在等待任务队列终止"
         const all = this.TasksInRun.concat(this.Tasks)
         await Promise.all(all.map(i => i.onClose(this)))
         this.rl?.close()
@@ -164,13 +164,22 @@ class Message {
     }
 
     private runTask(task: Task) {
+        const signal = task.timeout ? AbortSignal.timeout(task.timeout) : undefined
         const id = setTimeout(async () => {
             try {
-                await task.Run(this)
+                await task.Run(this, signal)
                 await task.onSuccess(this)
             }
             catch (e) {
-                await task.onFailed(this, e as Error)
+                if (e instanceof Error) {
+                    if (e.name === "TimeoutError") {
+                        await task.onTimeout(this)
+                    } else {
+                        await task.onFailed(this, e)
+                    }
+                } else {
+                    await task.onFailed(this, new Error(e?.toLocaleString()))
+                }
             }
             this.TaskSession = this.TaskSession.filter(i => i !== id)
             this.TasksInRun = this.TasksInRun.filter(i => i.uuid !== task.uuid)
@@ -299,7 +308,7 @@ class Message {
                 + this.TasksInRun.map(i => "\t*\t" + (i.name ?? i.uuid) + "\t" + i.status).join("\n")
                 + (this.TasksInRun.length === 0 ? "" : "\n")
                 + this.tip
-                + `\ncommand >${this.rl?.line}\r`
+                + `\ncommand >${this.rl?.line ?? ""}\r`
             this.lastScreen = main
             p(main)
             p(ansi.cursor.restore + ansi.cursor.show)
@@ -319,7 +328,7 @@ class Message {
                 + this.TasksInRun.map(i => "\t*\t" + (i.name ?? i.uuid) + "\t" + i.status).join("\n")
                 + (this.TasksInRun.length === 0 ? "" : "\n")
                 + this.tip
-                + `\ncommand >${this.rl?.line}\r`
+                + `\ncommand >${this.rl?.line ?? ""}\r`
             this.lastScreen = main
             p(msg + "\n" + main)
             p(ansi.cursor.restore + ansi.cursor.show)
@@ -337,4 +346,4 @@ class Message {
 }
 
 
-export { Message, Task }
+export { Message }

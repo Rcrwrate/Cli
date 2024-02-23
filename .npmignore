@@ -15,3 +15,5 @@ src/
 webpack.*
 
 tsconfig.json
+
+.github/

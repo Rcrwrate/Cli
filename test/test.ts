@@ -11,7 +11,7 @@ class exampleTask extends Task {
         this.uid = uid
     }
 
-    async Run(m: Message): Promise<any> {
+    async Run(m: Message, signal: AbortSignal): Promise<any> {
         await sleep(10000)
         m.pushLog(this.uuid, "INFO");
     }
