@@ -4,6 +4,7 @@ const sleep = (t: number | undefined) => new Promise((r) => setTimeout(r, t))
 
 class EndTask extends Task {
     name?: string | undefined = "End"
+
     async Run(m: Message): Promise<any> {
         await sleep(5000)
         return m.Close()
@@ -16,7 +17,8 @@ class EndTask extends Task {
 
 class TimeoutTest extends Task {
     name?: string | undefined = "TimeoutTest"
-    timeout: number | undefined = 1000
+    timeout: number | undefined = 500
+    single: number = 2
     async Run(m: Message, signal?: AbortSignal): Promise<any> {
         await sleep(3000)
         signal?.throwIfAborted()
@@ -43,7 +45,7 @@ m.run(async (m) => {
     await m.Storage.write("写入测试", "test.txt")
     await m.Storage.write(new Response("写入测试"), "test.txt")
     m.pushLog(`m.Storage.exist:${await m.Storage.exist("test.txt")}`, "DEBUG")
-    m.registerTask([new TimeoutTest(), new TimeoutTest2(), new EndTask()])
+    m.registerTask([new TimeoutTest(), new TimeoutTest(), new TimeoutTest(), new TimeoutTest2(), new EndTask()])
 })
 
 

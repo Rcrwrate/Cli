@@ -101,7 +101,11 @@ class Message {
     }
 
     private completer(line: string) {
-        const completions: { key: string, help?: string }[] = [{ key: "q", help: "退出Cli" }, { key: "debug", help: "更改日志等级为DEBUG" }]
+        const completions: { key: string, help?: string }[] = [
+            { key: "q", help: "退出Cli" },
+            { key: "debug", help: "临时更改日志等级为DEBUG" },
+            { key: "debug.show", help: "显示程序内所有数据" }
+        ]
         this.commands.forEach(i => { i.keyword.forEach(j => completions.push({ key: j, help: i.help })) })
         const hits = completions.filter((c) => c.key.startsWith(line));
         const hit = hits.find(i => i.key === line)
@@ -118,12 +122,15 @@ class Message {
     }
 
     private runCommands(r: string) {
-        this.pushLog(r, "DEBUG")
+        this.pushLog(`input: ${r}`, "DEBUG")
         switch (r) {
             case "q":
                 this.Close()
             case "debug":
                 this.changeLogLevel("DEBUG")
+                break
+            case "debug.show":
+                this.pushLog(`${JSON.stringify({ ...this }, undefined, 2)}`, "DEBUG")
                 break
             default:
                 for (const i of this.commands) {
@@ -155,11 +162,21 @@ class Message {
 
     private async runTasks() {
         if (this.Tasks.length !== 0 && this.TasksInRun.length < this.MaxRun) {
+            let single = 0
             let t: Task | undefined
             do {
                 t = this.Tasks.shift()
-                if (t) this.runTask(t)
-            } while (t?.noLimit)
+                if (t) {
+                    if (single < t.single) {
+                        this.runTask(t)
+                        single++
+                    } else {
+                        return this.Tasks.unshift(t)
+                    }
+                } else {
+                    return
+                }
+            } while (t && (t.noLimit || single < t.single))
         }
     }
 

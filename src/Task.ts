@@ -8,6 +8,8 @@ export class Task {
     noLimit = false;
     /** 优先级，越小越优先 @default 10*/
     priority: number = 10;
+    /** 该类任务单次(每0.5s)执行上限 @default 1*/
+    single: number = 1
     /** 任务名称 */
     name?: string;
     /** 任务唯一标识，自动使用`crypto.randomUUID`生成 */
@@ -56,7 +58,7 @@ export class Task {
      * if (e.name === "TimeoutError" || e.name === "AbortError" || e.message.includes("aborted")) {
      *     m.pushLog(`${this.name ?? this.uuid} 超时${this.timeout as number / 1000}s`, "ERROR")
      * }    //判断是否属于超时
-     * m.pushLog(JSON.stringify({ ...this }), "ERROR");
+     * m.pushLog(JSON.stringify({ ...this }, null, 2), "ERROR");
      * m.pushLog(e.stack ?? e.message, "ERROR");
      * ```
      */
@@ -65,7 +67,7 @@ export class Task {
         if (e.name === "TimeoutError" || e.name === "AbortError" || e.message.includes("aborted")) {
             m.pushLog(`${this.name ?? this.uuid} 超时${this.timeout as number / 1000}s`, "ERROR")
         }
-        m.pushLog(JSON.stringify({ ...this }), "ERROR");
+        m.pushLog(JSON.stringify({ ...this }, null, 2), "ERROR");
         m.pushLog(e.stack ?? e.message, "ERROR");
     }
 
