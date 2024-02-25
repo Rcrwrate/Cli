@@ -22,10 +22,14 @@ class TimeoutTest extends Task {
         signal?.throwIfAborted()
         return
     }
+}
 
-    async onTimeout(m: Message): Promise<void> {
-        await sleep(1000)
-        m.pushLog(`${this.name ?? this.uuid} 超时${this.timeout as number / 1000}s`, "ERROR")
+class TimeoutTest2 extends Task {
+    name?: string | undefined = "TimeoutTest2"
+    timeout: number | undefined = 1
+    async Run(m: Message, signal?: AbortSignal): Promise<any> {
+        await fetch("https://google.com", { signal: signal })
+        return fetch("https://google.com", { signal: signal })
     }
 }
 
@@ -39,7 +43,7 @@ m.run(async (m) => {
     await m.Storage.write("写入测试", "test.txt")
     await m.Storage.write(new Response("写入测试"), "test.txt")
     m.pushLog(`m.Storage.exist:${await m.Storage.exist("test.txt")}`, "DEBUG")
-    m.registerTask([new TimeoutTest(), new EndTask()])
+    m.registerTask([new TimeoutTest(), new TimeoutTest2(), new EndTask()])
 })
 
 

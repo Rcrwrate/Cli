@@ -175,15 +175,7 @@ class Message {
                 await task.onSuccess(this)
             }
             catch (e) {
-                if (e instanceof Error) {
-                    if (e.name === "TimeoutError") {
-                        await task.onTimeout(this)
-                    } else {
-                        await task.onFailed(this, e)
-                    }
-                } else {
-                    await task.onFailed(this, new Error(e?.toLocaleString()))
-                }
+                await task.onFailed(this, e instanceof Error ? e : new Error(e?.toLocaleString()))
             }
             this.TaskSession = this.TaskSession.filter(i => i !== id)
             this.TasksInRun = this.TasksInRun.filter(i => i.uuid !== task.uuid)
@@ -301,10 +293,7 @@ class Message {
     private toTerminal() {
         if (this.logs.length === 0) {
             const counts = this.lastScreen.split("\n").length
-            p(ansi.cursor.save + ansi.cursor.hide)
-            // p(ansi.cursor.left + ansi.cursor.to(9))
-            p(ansi.cursor.left)
-            p(ansi.erase.lines(counts))
+            p(ansi.cursor.hide + ansi.cursor.left + ansi.erase.lines(counts))
             let main = `\n\nTasks:\t\t\t${this.TaskStatus.success + this.TaskStatus.error} / ${this.TaskStatus.all}, ${(this.TaskStatus.success + this.TaskStatus.error) / this.TaskStatus.all * 100}%`
                 + `${this.TaskStatus.error ? `\nErrors:\t\t\t${this.TaskStatus.error} (retrying may help)` : ""}`
                 + `\nElapsed time:\t\t${this.renderTime()}\t\n`
@@ -315,16 +304,12 @@ class Message {
                 + `\ncommand >${this.rl?.line ?? ""}\r`
             this.lastScreen = main
             p(main)
-            p(ansi.cursor.restore + ansi.cursor.show)
-            p(ansi.cursor.down(counts))
+            p(ansi.cursor.show + ansi.cursor.down(counts) + ansi.cursor.move(9 + (this.rl?.line.length ?? 0), 0))
         }
         while (this.logs.length !== 0) {
             const msg = this.logs.shift()
             const counts = this.lastScreen.split("\n").length
-            p(ansi.cursor.save + ansi.cursor.hide)
-            // p(ansi.cursor.left + ansi.cursor.to(9))
-            p(ansi.cursor.left)
-            p(ansi.erase.lines(counts))
+            p(ansi.cursor.hide + ansi.cursor.left + ansi.erase.lines(counts))
             let main = `\n\nTasks:\t\t\t${this.TaskStatus.success + this.TaskStatus.error} / ${this.TaskStatus.all}, ${(this.TaskStatus.success + this.TaskStatus.error) / this.TaskStatus.all * 100}%`
                 + `${this.TaskStatus.error ? `\nErrors:\t\t\t${this.TaskStatus.error} (retrying may help)` : ""}`
                 + `\nElapsed time:\t\t${this.renderTime()}\t\n`
@@ -335,8 +320,7 @@ class Message {
                 + `\ncommand >${this.rl?.line ?? ""}\r`
             this.lastScreen = main
             p(msg + "\n" + main)
-            p(ansi.cursor.restore + ansi.cursor.show)
-            p(ansi.cursor.down(counts))
+            p(ansi.cursor.show + ansi.cursor.down(counts) + ansi.cursor.move(9 + (this.rl?.line.length ?? 0), 0))
         }
     }
 

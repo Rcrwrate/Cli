@@ -30,7 +30,7 @@ export class Task {
      * ```
      */
     async Run(m: Message, signal?: AbortSignal): Promise<any> {
-        
+
     }
 
     /**
@@ -48,30 +48,25 @@ export class Task {
     }
 
     /**
-     * 任务失败时调用
+     * 任务失败时调用(包括超时)
      * 
      * 请尽量不要忘记调用，可以随意自定义
      * ```
-     * m.pushStatus({ error: 1 });  // 遗失会导致任务统计缺失
-     * m.pushLog(JSON.stringify({ ...this }), "ERROR"); 
+     * m.pushStatus({ error: 1 });// 遗失会导致任务统计缺失
+     * if (e.name === "TimeoutError" || e.name === "AbortError" || e.message.includes("aborted")) {
+     *     m.pushLog(`${this.name ?? this.uuid} 超时${this.timeout as number / 1000}s`, "ERROR")
+     * }    //判断是否属于超时
+     * m.pushLog(JSON.stringify({ ...this }), "ERROR");
      * m.pushLog(e.stack ?? e.message, "ERROR");
      * ```
      */
     async onFailed(m: Message, e: Error) {
         m.pushStatus({ error: 1 });
+        if (e.name === "TimeoutError" || e.name === "AbortError" || e.message.includes("aborted")) {
+            m.pushLog(`${this.name ?? this.uuid} 超时${this.timeout as number / 1000}s`, "ERROR")
+        }
         m.pushLog(JSON.stringify({ ...this }), "ERROR");
         m.pushLog(e.stack ?? e.message, "ERROR");
-    }
-
-    /**
-     * 任务超时
-     * @default
-     * ```ts
-     * m.pushLog(`${this.name ?? this.uuid} 超时${this.timeout as number / 1000}s`, "ERROR")
-     * ```
-     */
-    async onTimeout(m: Message) {
-        m.pushLog(`${this.name ?? this.uuid} 超时${this.timeout as number / 1000}s`, "ERROR")
     }
 
     /**
