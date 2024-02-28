@@ -1,6 +1,6 @@
 {
   "name": "@rcrwrate/cli",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Cli",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -8,7 +8,8 @@
     "tsc": "rm -rf ./dist/ && tsc",
     "publish": "npm publish --access public",
     "test": "tsc test/test.ts -target ES6 -moduleResolution node -module CommonJS && node test/test.js",
-    "ci": "tsc test/ci.ts -target ES6 -moduleResolution node -module CommonJS && node test/ci.js"
+    "ci": "tsc test/ci.ts -target ES6 -moduleResolution node -module CommonJS && node test/ci.js",
+    "wb": "webpack --config webpack.config.js && node test/test.js"
   },
   "author": "Rcrwrate",
   "license": "MIT",
@@ -23,6 +24,9 @@
     "url": "git+https://github.com/Rcrwrate/Cli.git"
   },
   "devDependencies": {
-    "@types/node": "^20.11.19"
+    "@types/node": "^20.11.19",
+    "ts-loader": "^9.5.1",
+    "webpack": "^5.90.3",
+    "webpack-cli": "^5.1.4"
   }
 }

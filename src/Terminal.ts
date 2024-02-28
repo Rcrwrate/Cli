@@ -95,7 +95,11 @@ class Message {
         let r: string
         r = await rl.question("command >")
         while (true) {
-            this.runCommands(r)
+            try {
+                this.runCommands(r)
+            } catch (e) {
+                this.pushLog(`控制台错误: ${e}`, "ERROR")
+            }
             r = await rl.question("command >")
         }
     }
@@ -112,6 +116,7 @@ class Message {
         if (hit) {
             this.Tip(`\n${hit.key} : ${hit.help ?? "无说明"}`, 1500)
         } else if (hits.length === 1) {
+            this.rl?.write(hits[0].key.replace(line, ""))
             this.Tip(`\n${hits[0].key} : ${hits[0].help ?? "无说明"}`, 1500)
         } else {
             // Show all completions if none found
@@ -323,8 +328,11 @@ class Message {
             p(main)
             p(ansi.cursor.show + ansi.cursor.down(counts) + ansi.cursor.move(9 + (this.rl?.line.length ?? 0), 0))
         }
-        while (this.logs.length !== 0) {
-            const msg = this.logs.shift()
+        else {
+            let msg = ""
+            do {
+                msg += this.logs.shift() + "\n"
+            } while (this.logs.length !== 0)
             const counts = this.lastScreen.split("\n").length
             p(ansi.cursor.hide + ansi.cursor.left + ansi.erase.lines(counts))
             let main = `\n\nTasks:\t\t\t${this.TaskStatus.success + this.TaskStatus.error} / ${this.TaskStatus.all}, ${(this.TaskStatus.success + this.TaskStatus.error) / this.TaskStatus.all * 100}%`
@@ -336,7 +344,7 @@ class Message {
                 + this.tip
                 + `\ncommand >${this.rl?.line ?? ""}\r`
             this.lastScreen = main
-            p(msg + "\n" + main)
+            p(msg + main)
             p(ansi.cursor.show + ansi.cursor.down(counts) + ansi.cursor.move(9 + (this.rl?.line.length ?? 0), 0))
         }
     }

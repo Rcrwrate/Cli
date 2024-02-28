@@ -38,7 +38,7 @@ export class Task {
     /**
      * 任务成功后执行
      * 
-     * 请尽量不要忘记调用，可以随意自定义
+     * @default
      * ```
      * m.pushStatus({ success: 1 });    // 遗失会导致任务统计缺失
      * m.pushLog(`${this.name ?? this.uuid} 完成`, "INFO")
@@ -52,7 +52,7 @@ export class Task {
     /**
      * 任务失败时调用(包括超时)
      * 
-     * 请尽量不要忘记调用，可以随意自定义
+     * @default
      * ```
      * m.pushStatus({ error: 1 });// 遗失会导致任务统计缺失
      * if (e.name === "TimeoutError" || e.name === "AbortError" || e.message.includes("aborted")) {

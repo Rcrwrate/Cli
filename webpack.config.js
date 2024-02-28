@@ -14,11 +14,11 @@ module.exports = {
     target: "node",
     mode: "production",
     entry: {
-        index: './src/index.ts',
+        test: './test/test.ts',
     },
     output: {
         filename: '[name].js',
-        path: path.resolve(__dirname, 'dist'),
+        path: path.resolve(__dirname, 'test'),
     },
     resolve: {
         extensions: ['.js', '.ts'],
