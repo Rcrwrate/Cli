@@ -1,7 +1,7 @@
 import { join } from 'path'
-import { StorageProvider } from "./default";
+import { StorageProvider, type encode } from "./default";
 import { existsSync, mkdirSync } from 'fs'
-import { writeFile } from 'fs/promises'
+import { writeFile, readFile } from 'fs/promises'
 
 class LocalProvider extends StorageProvider {
     path: string
@@ -22,6 +22,22 @@ class LocalProvider extends StorageProvider {
 
     async exist(name: string): Promise<boolean> {
         return existsSync(join(this.path, name))
+    }
+
+    async readString(filename: string, option: { encoding: encode; flag?: string | number | undefined; signal?: AbortSignal | undefined; } | encode): Promise<string | undefined> {
+        try {
+            return await readFile(join(this.path, filename), option)
+        } catch {
+            return
+        }
+    }
+
+    async readBuffer(filename: string, option?: { flag?: string | number | undefined; signal?: AbortSignal | undefined; } | undefined): Promise<Buffer | undefined> {
+        try {
+            return await readFile(join(this.path, filename), option)
+        } catch {
+            return
+        }
     }
 
     protected async writeResponse(r: Response, filename: string): Promise<any> {

@@ -1,3 +1,5 @@
+type encode = "utf-8" | "ascii" | "utf8" | "utf16le" | "utf-16le" | "ucs2" | "ucs-2" | "base64" | "base64url" | "latin1" | "binary" | "hex"
+
 class StorageProvider {
     constructor() { }
 
@@ -10,6 +12,16 @@ class StorageProvider {
      */
     async exist(name: string): Promise<boolean> {
         return true
+    }
+
+    /** 读取文件 */
+    async readString(filename: string, option: { encoding: encode; flag?: string | number | undefined; signal?: AbortSignal | undefined } | encode): Promise<string | undefined> {
+        return
+    }
+
+    /** 读取文件 */
+    async readBuffer(filename: string, option?: { flag?: string | number | undefined; signal?: AbortSignal | undefined }): Promise<Buffer | undefined> {
+        return
     }
 
     /**
@@ -43,4 +55,4 @@ class StorageError extends Error {
     name: string = "StorageError"
 }
 
-export { StorageProvider }
+export { StorageProvider, type encode }

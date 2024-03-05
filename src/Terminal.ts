@@ -122,7 +122,6 @@ class Message {
             // Show all completions if none found
             this.Tip(`\n${(hits.length ? hits.map(i => i.key) : completions.map(i => i.key)).join("\t")}`, 1500)
         }
-
         return [[], line];
     }
 
@@ -326,7 +325,7 @@ class Message {
                 + `\ncommand >${this.rl?.line ?? ""}\r`
             this.lastScreen = main
             p(main)
-            p(ansi.cursor.show + ansi.cursor.down(counts) + ansi.cursor.move(9 + (this.rl?.line.length ?? 0), 0))
+            p(ansi.cursor.show + ansi.cursor.down(counts) + ansi.cursor.move(9 + (this.rl?.cursor ?? 0), 0))
         }
         else {
             let msg = ""
@@ -345,7 +344,7 @@ class Message {
                 + `\ncommand >${this.rl?.line ?? ""}\r`
             this.lastScreen = main
             p(msg + main)
-            p(ansi.cursor.show + ansi.cursor.down(counts) + ansi.cursor.move(9 + (this.rl?.line.length ?? 0), 0))
+            p(ansi.cursor.show + ansi.cursor.down(counts) + ansi.cursor.move(9 + (this.rl?.cursor ?? 0), 0))
         }
     }
 
