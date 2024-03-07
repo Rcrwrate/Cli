@@ -1,11 +1,11 @@
 {
   "name": "@rcrwrate/cli",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Cli",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "tsc": "rm -rf ./dist/ && tsc",
+    "tsc": "tsc",
     "publish": "npm publish --access public",
     "test": "tsc test/test.ts -target ES6 -moduleResolution node -module CommonJS && node test/test.js",
     "ci": "tsc test/ci.ts -target ES6 -moduleResolution node -module CommonJS && node test/ci.js",

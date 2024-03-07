@@ -62,11 +62,8 @@ class Message {
 
     constructor(c: cache) {
         this.cache = c
-        p("\n".repeat(70) + "command >\r")
-
-        setTimeout(() => p(ansi.cursor.to(9)), 1000)
         setInterval(() => this.toTerminal(), 500)
-        setInterval(async () => this.runTasks(), 500)
+        setInterval(() => this.runTasks(), 500)
         this.start()
         this.registerCommand({
             keyword: ["s"], priority: 10, help: "控制最大线程数量", func: (input, m) => {
@@ -312,8 +309,11 @@ class Message {
     }
 
     private toTerminal() {
+        /** 输入字符串行数 */
+        const input = (this.rl?.line.length ?? 0) / process.stdout.columns | 0
+        const Pos = this.rl?.getCursorPos() ?? { rows: 0, cols: 9 }
         if (this.logs.length === 0) {
-            const counts = this.lastScreen.split("\n").length
+            const counts = this.lastScreen.split("\n").length + (input === Pos.rows ? input : Pos.rows)
             p(ansi.cursor.hide + ansi.cursor.left + ansi.erase.lines(counts))
             let main = `\n\nTasks:\t\t\t${this.TaskStatus.success + this.TaskStatus.error} / ${this.TaskStatus.all}, ${(this.TaskStatus.success + this.TaskStatus.error) / this.TaskStatus.all * 100}%`
                 + `${this.TaskStatus.error ? `\nErrors:\t\t\t${this.TaskStatus.error} (retrying may help)` : ""}`
@@ -325,14 +325,14 @@ class Message {
                 + `\ncommand >${this.rl?.line ?? ""}\r`
             this.lastScreen = main
             p(main)
-            p(ansi.cursor.show + ansi.cursor.down(counts) + ansi.cursor.move(9 + (this.rl?.cursor ?? 0), 0))
+            p(ansi.cursor.show + ansi.cursor.down(counts) + ansi.cursor.move(Pos.cols, Pos.rows - input) + ansi.cursor.up(input - Pos.cols))
         }
         else {
             let msg = ""
             do {
                 msg += this.logs.shift() + "\n"
             } while (this.logs.length !== 0)
-            const counts = this.lastScreen.split("\n").length
+            const counts = this.lastScreen.split("\n").length + (input === Pos.rows ? input : Pos.rows)
             p(ansi.cursor.hide + ansi.cursor.left + ansi.erase.lines(counts))
             let main = `\n\nTasks:\t\t\t${this.TaskStatus.success + this.TaskStatus.error} / ${this.TaskStatus.all}, ${(this.TaskStatus.success + this.TaskStatus.error) / this.TaskStatus.all * 100}%`
                 + `${this.TaskStatus.error ? `\nErrors:\t\t\t${this.TaskStatus.error} (retrying may help)` : ""}`
@@ -344,7 +344,7 @@ class Message {
                 + `\ncommand >${this.rl?.line ?? ""}\r`
             this.lastScreen = main
             p(msg + main)
-            p(ansi.cursor.show + ansi.cursor.down(counts) + ansi.cursor.move(9 + (this.rl?.cursor ?? 0), 0))
+            p(ansi.cursor.show + ansi.cursor.down(counts) + ansi.cursor.move(Pos.cols, Pos.rows - input) + ansi.cursor.up(input - Pos.cols))
         }
     }
 
