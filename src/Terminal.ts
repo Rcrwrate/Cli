@@ -49,6 +49,8 @@ class Message {
     private MaxRun = 4
     private rl?: readline.Interface
 
+    private onclose: Array<(m: Message) => void | Promise<void>> = []
+
     /** 缓存服务 */
     cache: cache
 
@@ -62,6 +64,7 @@ class Message {
 
     constructor(c: cache) {
         this.cache = c
+        p("\n".repeat(70) + "command >\r")
         setInterval(() => this.toTerminal(), 500)
         setInterval(() => this.runTasks(), 500)
         this.start()
@@ -154,8 +157,8 @@ class Message {
     async Close() {
         this.rl?.pause()
         this.tip = "\n正在等待任务队列终止"
-        const all = this.TasksInRun.concat(this.Tasks)
-        await Promise.all(all.map(i => i.onClose(this)))
+        const all: Array<void | Promise<void>> = this.TasksInRun.concat(this.Tasks).map(i => i.onClose(this))
+        await Promise.all(all.concat(this.onclose.map(j => j(this))))
         this.rl?.close()
         this.cache.save()
         process.exit(0)
@@ -305,6 +308,15 @@ class Message {
             return Promise.all(funcs.map(i => i(this)))
         } else {
             return funcs(this)
+        }
+    }
+
+    /** 注册关闭触发器 */
+    onClose(funcs: ((m: Message) => void | Promise<void>) | Array<(m: Message) => void | Promise<void>>) {
+        if (funcs instanceof Array) {
+            this.onclose = this.onclose.concat(funcs)
+        } else {
+            this.onclose.push(funcs)
         }
     }
 

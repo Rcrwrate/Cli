@@ -4,7 +4,7 @@ import { existsSync, mkdirSync } from 'fs'
 import { writeFile, readFile } from 'fs/promises'
 
 class LocalProvider extends StorageProvider {
-    path: string
+    protected path: string
 
     /**
      * @param path 根目录 例如 [".tmp","2024.1.1"] 

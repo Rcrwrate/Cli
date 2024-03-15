@@ -35,6 +35,10 @@ class TimeoutTest2 extends Task {
     }
 }
 
+m.onClose((m) => {
+    m.pushLog("Closed", "INFO")
+})
+
 m.run(async (m) => {
     m.changeLogLevel("DEBUG")
     m.pushStatus({ all: 2, success: 1, error: 1 })
