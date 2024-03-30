@@ -16,6 +16,18 @@ export type commands = {
     help?: string
 }
 type loglevel = "DEBUG" | "INFO" | "WARNING" | "ERROR"
+
+type Option = {
+    /**禁用交互 @default false */
+    NoInteraction?: boolean,
+    /** 默认时间间隔(单位:毫秒) @default 500 */
+    TimeInterval?: number,
+    /** 任务执行间隔(单位:毫秒) @default 500 */
+    TaskInterval?: number,
+    /** 终端渲染间隔(单位:毫秒) @default 500 */
+    RenderInterval?: number,
+}
+
 const logTr = {
     DEBUG: 0,
     INFO: 10,
@@ -51,8 +63,13 @@ class Message {
 
     private onclose: Array<(m: Message) => void | Promise<void>> = []
 
+    private __cache: cache
     /** 缓存服务 */
-    cache: cache
+    get cache() {
+        return this.__cache
+    }
+
+    private __Storage: StorageProvider = new LocalProvider()
 
     /** 
      * 文件服务
@@ -60,25 +77,38 @@ class Message {
      * 如果需要替换，请使用changeStorgeProvider
      * @example m.changeStorgeProvider(new LocalProvider([".tmp"]))
      */
-    Storage: StorageProvider = new LocalProvider()
+    get Storage() {
+        return this.__Storage
+    }
 
-    constructor(c: cache) {
-        this.cache = c
-        p("\n".repeat(70) + "command >\r")
-        setInterval(() => this.toTerminal(), 500)
-        setInterval(() => this.runTasks(), 500)
-        this.start()
-        this.registerCommand({
-            keyword: ["s"], priority: 10, help: "控制最大线程数量", func: (input, m) => {
-                const c = parseInt(input)
-                if (isNaN(c)) {
-                    this.Tip("\n使用>s +1/-1控制最大线程数量\n", 1000)
-                } else {
-                    this.MaxRun += c
-                    this.Tip(`\n当前最大线程数:${this.MaxRun}\n`, 1000)
+    constructor(c: cache, option: Option = {}) {
+        this.__cache = c
+        if (option.NoInteraction) {
+            setInterval(() => {
+                let msg = ""
+                do {
+                    msg += this.logs.shift() + "\n"
+                } while (this.logs.length !== 0)
+                p(msg)
+            }, option.RenderInterval ?? option.TimeInterval ?? 500)
+            setInterval(() => { if (this.TasksInRun.length === 0 && this.Tasks.length === 0) this.Close() }, 500)
+        } else {
+            p("\n".repeat(70) + "command >\r")
+            setInterval(() => this.toTerminal(), option.RenderInterval ?? option.TimeInterval ?? 500)
+            this.start()
+            this.registerCommand({
+                keyword: ["s"], priority: 10, help: "控制最大线程数量", func: (input, _m) => {
+                    const c = parseInt(input)
+                    if (isNaN(c)) {
+                        this.Tip("\n使用>s +1/-1控制最大线程数量\n", 1000)
+                    } else {
+                        this.MaxRun += c
+                        this.Tip(`\n当前最大线程数:${this.MaxRun}\n`, 1000)
+                    }
                 }
-            }
-        })
+            })
+        }
+        setInterval(() => this.runTasks(), option.TaskInterval ?? option.TimeInterval ?? 500)
         this.Storage.init()
     }
 
@@ -230,7 +260,7 @@ class Message {
      */
     async changeStorgeProvider(S: StorageProvider) {
         await S.init()
-        this.Storage = S
+        this.__Storage = S
     }
 
     /**

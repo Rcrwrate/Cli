@@ -1,5 +1,9 @@
-import { Task, m, type Message } from '../dist'
+import { Task } from '../dist/Task'
+import { Message } from '../dist/Terminal'
+import { cache } from '../dist/cache'
 
+
+const m = new Message(new cache(), { NoInteraction: true, RenderInterval: 100, TaskInterval: 1000 })
 const sleep = (t: number | undefined) => new Promise((r) => setTimeout(r, t))
 
 class EndTask extends Task {
@@ -35,8 +39,9 @@ class TimeoutTest2 extends Task {
     }
 }
 
-m.onClose((m) => {
+m.onClose(async (m) => {
     m.pushLog("Closed", "INFO")
+    await sleep(1000)
 })
 
 m.run(async (m) => {
@@ -74,7 +79,7 @@ m.run(async (m) => {
     m.pushLog(`m.Storage.exist:${await m.Storage.exist("test.txt")}`, "DEBUG")
     m.pushLog(`m.Storage.read:${await m.Storage.readString("test.txt", "utf-8")}`, "DEBUG")
     m.pushLog(`m.Storage.read:${await m.Storage.readString("test3.txt", "utf-8")}`, "DEBUG")
-    m.registerTask([new TimeoutTest(), new TimeoutTest(), new TimeoutTest(), new TimeoutTest2(), new EndTask()])
+    m.registerTask([new TimeoutTest(), new TimeoutTest(), new TimeoutTest(), new TimeoutTest2()])
 })
 
 
