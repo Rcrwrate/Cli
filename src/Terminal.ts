@@ -26,6 +26,8 @@ type Option = {
     TaskInterval?: number,
     /** 终端渲染间隔(单位:毫秒) @default 500 */
     RenderInterval?: number,
+    /** 日志渲染 @default ()=>`${new Date().toLocaleString()} ${logTi[level]}: ${msg}` */
+    RenderLog?: (msg: string, level: loglevel) => string
 }
 
 const logTr = {
@@ -60,9 +62,8 @@ class Message {
     private TaskSession: NodeJS.Timeout[] = []
     private MaxRun = 4
     private rl?: readline.Interface
-
     private onclose: Array<(m: Message) => void | Promise<void>> = []
-
+    private RenderLog?: (msg: string, level: loglevel) => string
     private __cache: cache
     /** 缓存服务 */
     get cache() {
@@ -83,12 +84,13 @@ class Message {
 
     constructor(c: cache, option: Option = {}) {
         this.__cache = c
+        this.RenderLog = option.RenderLog
         if (option.NoInteraction) {
             setInterval(() => {
                 let msg = ""
-                do {
+                while (this.logs.length !== 0) {
                     msg += this.logs.shift() + "\n"
-                } while (this.logs.length !== 0)
+                }
                 p(msg)
             }, option.RenderInterval ?? option.TimeInterval ?? 500)
             setInterval(() => { if (this.TasksInRun.length === 0 && this.Tasks.length === 0) this.Close() }, 500)
@@ -270,7 +272,9 @@ class Message {
      */
     pushLog(msg: string, level: loglevel) {
         if (logTr[level] >= logTr[this.loglevel]) {
-            this.logs.push(`${new Date().toLocaleString()} ${logTi[level]}: ${msg}`)
+            this.RenderLog
+                ? this.logs.push(this.RenderLog(msg, level))
+                : this.logs.push(`${new Date().toLocaleString()} ${logTi[level]}: ${msg}`)
         }
     }
 

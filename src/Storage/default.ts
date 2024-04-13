@@ -14,6 +14,13 @@ class StorageProvider {
         return true
     }
 
+    /** 读取文件夹内容 */
+    async readdir<T extends {} = {}>(path: string): Promise<{ exist: false } | {
+        exist: true, data: Array<{ name: string } & T>
+    }> {
+        return { exist: false }
+    }
+
     /** 读取文件 */
     async readString(filename: string, option: { encoding: encode; flag?: string | number | undefined; signal?: AbortSignal | undefined } | encode): Promise<string | undefined> {
         return

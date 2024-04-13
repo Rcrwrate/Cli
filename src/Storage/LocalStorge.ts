@@ -1,7 +1,7 @@
 import { join } from 'path'
 import { StorageProvider, type encode } from "./default";
 import { existsSync, mkdirSync } from 'fs'
-import { writeFile, readFile } from 'fs/promises'
+import { writeFile, readFile, readdir } from 'fs/promises'
 
 class LocalProvider extends StorageProvider {
     protected path: string
@@ -22,6 +22,15 @@ class LocalProvider extends StorageProvider {
 
     async exist(name: string): Promise<boolean> {
         return existsSync(join(this.path, name))
+    }
+
+    async readdir<T extends {} = {}>(path: string): Promise<{ exist: false; } | { exist: true; data: ({ name: string; } & T)[]; }> {
+        try {
+            const d = await readdir(join(this.path, path))
+            return { exist: true, data: d.map(i => { return { name: i } as { name: string; } & T }) }
+        } catch {
+            return { exist: false }
+        }
     }
 
     async readString(filename: string, option: { encoding: encode; flag?: string | number | undefined; signal?: AbortSignal | undefined; } | encode): Promise<string | undefined> {
