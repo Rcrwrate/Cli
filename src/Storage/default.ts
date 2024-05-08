@@ -1,3 +1,5 @@
+import type { Stats } from "fs";
+
 type encode = "utf-8" | "ascii" | "utf8" | "utf16le" | "utf-16le" | "ucs2" | "ucs-2" | "base64" | "base64url" | "latin1" | "binary" | "hex"
 
 class StorageProvider {
@@ -31,6 +33,11 @@ class StorageProvider {
         return
     }
 
+    /** 信息访问 */
+    async stat(path: string): Promise<Stats> {
+        return {} as Stats
+    }
+
     /**
      * 将数据写入到指定位置
      * @param r 
@@ -44,6 +51,14 @@ class StorageProvider {
         } else {
             throw this.error("写入错误:类型不支持")
         }
+    }
+
+    /**
+     * 创建文件夹，递归创建
+     * @param path 
+     */
+    async mkdir(path: string, option: { recursive: true }): Promise<any> {
+
     }
 
     /** 将数据写入到指定位置 */

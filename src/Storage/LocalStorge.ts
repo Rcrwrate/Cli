@@ -1,7 +1,7 @@
 import { join } from 'path'
 import { StorageProvider, type encode } from "./default";
 import { existsSync, mkdirSync } from 'fs'
-import { writeFile, readFile, readdir } from 'fs/promises'
+import { writeFile, readFile, readdir, stat as s } from 'fs/promises'
 
 class LocalProvider extends StorageProvider {
     protected path: string
@@ -46,6 +46,17 @@ class LocalProvider extends StorageProvider {
             return await readFile(join(this.path, filename), option)
         } catch {
             return
+        }
+    }
+
+    async stat(path: string) {
+        return s(join(this.path, path))
+    }
+
+    async mkdir(path: string, option: { recursive: true; }): Promise<any> {
+        const p = join(this.path, path)
+        if (!existsSync(p)) {
+            mkdirSync(p, option)
         }
     }
 
