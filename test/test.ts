@@ -23,6 +23,49 @@ class exampleTask extends Task {
     }
 }
 
+class LongNameTest extends exampleTask {
+    id?: NodeJS.Timeout
+    constructor(uid: string) {
+        super(uid)
+        this.name = "longTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTest"
+        this.status = "testing"
+    }
+
+    async Run(m: Message, signal: AbortSignal): Promise<any> {
+        this.id = setInterval(() => {
+            this.status = process.stdout.columns.toString()
+        }, 100);
+        await sleep(10000)
+        m.pushLog(this.uuid, "INFO");
+    }
+
+    async onSuccess(m: Message): Promise<void> {
+        clearInterval(this.id)
+    }
+}
+
+
+class LongStatusTest extends exampleTask {
+    id?: NodeJS.Timeout
+    constructor(uid: string) {
+        super(uid)
+        this.name = "longTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTest"
+        this.status = "testing"
+    }
+
+    async Run(m: Message, signal: AbortSignal): Promise<any> {
+        this.id = setInterval(() => {
+            this.status = process.stdout.columns.toString() + this.uuid
+        }, 100);
+        await sleep(10000)
+        m.pushLog(this.uuid, "INFO");
+    }
+
+    async onSuccess(m: Message): Promise<void> {
+        clearInterval(this.id)
+    }
+}
+
 //注册控制台命令
 m.registerCommand([
     {
@@ -42,10 +85,17 @@ m.registerCommand([
             m.Storage.write(input, "test.txt")
             m.Storage.write(new Response(input), "test2.txt")
         },
-        keyword: ["test.w"],
+        keyword: ["w"],
         priority: 9,
         help: "写入测试"
     },
+    {
+        func(input, m) {
+            m.registerTask([new LongNameTest("1"), new LongStatusTest("2")])
+        },
+        keyword: ["long"],
+        priority: 10,
+    }
 ]);
 
 //立即执行

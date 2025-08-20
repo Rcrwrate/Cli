@@ -4,6 +4,7 @@ import pc from 'picocolors'
 import { LocalProvider, type StorageProvider } from './Storage';
 import type { cache } from './cache';
 import type { Task } from './Task';
+import { count } from './utils';
 
 const p = (s: string) => process.stdout.write(s)
 
@@ -136,7 +137,7 @@ class Message {
         }
     }
 
-    private completer(line: string) {
+    private completer(line: string): [string[], string] {
         const completions: { key: string, help?: string }[] = [
             { key: "q", help: "退出Cli" },
             { key: "debug", help: "临时更改日志等级为DEBUG" },
@@ -365,7 +366,22 @@ class Message {
                 + `${this.TaskStatus.error ? `\nErrors:\t\t\t${this.TaskStatus.error} (retrying may help)` : ""}`
                 + `\nElapsed time:\t\t${this.renderTime()}\t\n`
                 + (this.TasksInRun.length === 0 ? "" : "\n")
-                + this.TasksInRun.map(i => "\t*\t" + (i.name ?? i.uuid) + "\t" + i.status).join("\n")
+
+                // + this.TasksInRun.map(i => "\t*\t" + (i.name ?? i.uuid) + "\t" + i.status).join("\n")
+                + this.TasksInRun.map(i => {
+                    const raw = "\t*\t" + (i.name ?? i.uuid) + "\t" + i.status
+                    const totalLength = count(raw)
+                    const terminalWidth = process.stdout.columns; // 可以预留一些边距空间
+                    if (totalLength > terminalWidth) {
+                        // 如果总长度超过终端宽度，需要截断名称或状态，状态不方便截断
+                        const name = i.name ?? i.uuid;
+                        // -16是\t*\t的长度，-8是\t的长度
+                        const nameMaxLength = Math.max(10, terminalWidth - i.status.length - 16 - 8); // 确保名称至少有10个字符
+                        const truncatedName = name.substring(0, nameMaxLength - 3) + "..."
+                        return "\t*\t" + truncatedName + "\t" + i.status;
+                    }
+                    return raw
+                }).join("\n")
                 + (this.TasksInRun.length === 0 ? "" : "\n")
                 + this.tip
                 + `\ncommand >${this.rl?.line ?? ""}\r`
@@ -384,7 +400,20 @@ class Message {
                 + `${this.TaskStatus.error ? `\nErrors:\t\t\t${this.TaskStatus.error} (retrying may help)` : ""}`
                 + `\nElapsed time:\t\t${this.renderTime()}\t\n`
                 + (this.TasksInRun.length === 0 ? "" : "\n")
-                + this.TasksInRun.map(i => "\t*\t" + (i.name ?? i.uuid) + "\t" + i.status).join("\n")
+                + this.TasksInRun.map(i => {
+                    const raw = "\t*\t" + (i.name ?? i.uuid) + "\t" + i.status
+                    const totalLength = count(raw)
+                    const terminalWidth = process.stdout.columns; // 可以预留一些边距空间
+                    if (totalLength > terminalWidth) {
+                        // 如果总长度超过终端宽度，需要截断名称或状态，状态不方便截断
+                        const name = i.name ?? i.uuid;
+                        // -16是\t*\t的长度，-8是\t的长度
+                        const nameMaxLength = Math.max(10, terminalWidth - i.status.length - 16 - 8); // 确保名称至少有10个字符
+                        const truncatedName = name.substring(0, nameMaxLength - 3) + "..."
+                        return "\t*\t" + truncatedName + "\t" + i.status;
+                    }
+                    return raw
+                }).join("\n")
                 + (this.TasksInRun.length === 0 ? "" : "\n")
                 + this.tip
                 + `\ncommand >${this.rl?.line ?? ""}\r`

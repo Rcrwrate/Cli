@@ -43,11 +43,13 @@ class StorageProvider {
      * @param r 
      * @param filename 
      */
-    async write(r: Response | string, filename: string): Promise<any> {
+    async write(r: Response | string | Buffer, filename: string): Promise<any> {
         if (r instanceof Response) {
             return this.writeResponse(r, filename)
         } else if (typeof r === "string") {
             return this.writeString(r, filename)
+        } else if (r instanceof Buffer) {
+            return this.writeBuffer(r, filename)
         } else {
             throw this.error("写入错误:类型不支持")
         }
@@ -66,6 +68,8 @@ class StorageProvider {
 
     /** 将数据写入到指定位置 */
     protected async writeString(r: string, filename: string): Promise<any> { }
+
+    protected async writeBuffer(r: Buffer, filename: string): Promise<any> { }
 
     /** 错误工具 */
     protected error(msg?: string) {

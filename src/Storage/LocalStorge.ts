@@ -67,6 +67,10 @@ class LocalProvider extends StorageProvider {
     protected async writeString(r: string, filename: string): Promise<any> {
         return writeFile(join(this.path, filename), r)
     }
+
+    protected async writeBuffer(r: Buffer, filename: string): Promise<any> {
+        return writeFile(join(this.path, filename), r)
+    }
 }
 
 export { LocalProvider }

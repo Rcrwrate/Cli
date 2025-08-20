@@ -1,6 +1,6 @@
 {
   "name": "@rcrwrate/cli",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Cli",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -14,7 +14,7 @@
   "author": "Rcrwrate",
   "license": "MIT",
   "dependencies": {
-    "picocolors": "^1.0.0",
+    "picocolors": "^1.1.1",
     "sisteransi": "^1.0.5"
   },
   "engines": {
@@ -24,9 +24,9 @@
     "url": "git+https://github.com/Rcrwrate/Cli.git"
   },
   "devDependencies": {
-    "@types/node": "^20.11.19",
-    "ts-loader": "^9.5.1",
-    "webpack": "^5.90.3",
-    "webpack-cli": "^5.1.4"
+    "@types/node": "^24.3.0",
+    "ts-loader": "^9.5.2",
+    "webpack": "^5.101.3",
+    "webpack-cli": "^6.0.1"
   }
 }
