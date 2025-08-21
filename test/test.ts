@@ -27,7 +27,7 @@ class LongNameTest extends exampleTask {
     id?: NodeJS.Timeout
     constructor(uid: string) {
         super(uid)
-        this.name = "longTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTest"
+        this.name = "长长长longlonglong长长长longlonglong长长长longlonglong长长长longlonglong长长长longlonglong长长长longlonglong长长长longlonglong长长长longlonglong"
         this.status = "testing"
     }
 
@@ -50,7 +50,7 @@ class LongStatusTest extends exampleTask {
     constructor(uid: string) {
         super(uid)
         this.name = "longTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTestlongTest"
-        this.status = "testing"
+        this.status = "testing\ttesing"
     }
 
     async Run(m: Message, signal: AbortSignal): Promise<any> {

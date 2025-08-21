@@ -4,7 +4,7 @@ import pc from 'picocolors'
 import { LocalProvider, type StorageProvider } from './Storage';
 import type { cache } from './cache';
 import type { Task } from './Task';
-import { count } from './utils';
+import { count, substring } from './utils';
 
 const p = (s: string) => process.stdout.write(s)
 
@@ -377,7 +377,7 @@ class Message {
                         const name = i.name ?? i.uuid;
                         // -16是\t*\t的长度，-8是\t的长度
                         const nameMaxLength = Math.max(10, terminalWidth - i.status.length - 16 - 8); // 确保名称至少有10个字符
-                        const truncatedName = name.substring(0, nameMaxLength - 3) + "..."
+                        const truncatedName = substring(name, nameMaxLength - 3) + "..."
                         return "\t*\t" + truncatedName + "\t" + i.status;
                     }
                     return raw
@@ -409,7 +409,7 @@ class Message {
                         const name = i.name ?? i.uuid;
                         // -16是\t*\t的长度，-8是\t的长度
                         const nameMaxLength = Math.max(10, terminalWidth - i.status.length - 16 - 8); // 确保名称至少有10个字符
-                        const truncatedName = name.substring(0, nameMaxLength - 3) + "..."
+                        const truncatedName = substring(name, nameMaxLength - 3) + "..."
                         return "\t*\t" + truncatedName + "\t" + i.status;
                     }
                     return raw
